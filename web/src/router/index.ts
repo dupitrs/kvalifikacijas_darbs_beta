@@ -5,8 +5,10 @@ const About = () => import('../pages/About.vue')
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    { path: '/', component: Home },
-    { path: '/about', component: About },
+    { path: "/", name: "home", component: () => import("@/pages/Home.vue") },
+    { path: "/about", name: "about", component: () => import("@/pages/About.vue") },
+    { path: "/login", name: "login", component: () => import("@/pages/Login.vue") },
+    { path: "/register", name: "register", component: () => import("@/pages/Register.vue") },
   ],
 })
 
