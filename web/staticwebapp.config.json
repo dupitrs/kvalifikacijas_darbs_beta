@@ -3,5 +3,7 @@
     "rewrite": "/index.html",
     "exclude": ["/assets/*", "/*.css", "/*.js", "/*.png", "/*.svg", "/*.ico"]
   },
-  "responseOverrides": { "404": { "rewrite": "/index.html" } }
+  "responseOverrides": {
+    "404": { "rewrite": "/index.html" }
+  }
 }
