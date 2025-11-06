@@ -15,3 +15,7 @@ export default defineConfig({
     },
   },
 })
+
+define: {
+  'import.meta.env.VITE_APP_BUILD_TIME': JSON.stringify(new Date().toISOString())
+}
