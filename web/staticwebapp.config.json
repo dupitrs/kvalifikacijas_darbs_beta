@@ -5,15 +5,5 @@
   },
   "responseOverrides": {
     "404": { "rewrite": "/index.html" }
-  },
-  "globalHeaders": [
-    {
-      "source": "/index.html",
-      "headers": [
-        { "name": "Cache-Control", "value": "no-cache, no-store, must-revalidate" },
-        { "name": "Pragma", "value": "no-cache" },
-        { "name": "Expires", "value": "0" }
-      ]
-    }
-  ]
+  }
 }
