@@ -1,15 +1,9 @@
 <!-- web/src/pages/Home.vue -->
 <script setup lang="ts">
 import { useAuth } from '@/stores/auth'
-import { defineAsyncComponent } from 'vue'
-
+import PublicSummaryCards from '@/pages/ficas/PublicSummaryCards.vue' // ← statiskais imports, nekādu await
 const auth = useAuth()
-const PublicSummaryCards = defineAsyncComponent(
-  () => import('@/pages/ficas/PublicSummaryCards.vue')
-)
 </script>
-
-
 
 <template>
   <!-- Top bar -->
@@ -33,7 +27,7 @@ const PublicSummaryCards = defineAsyncComponent(
     </nav>
   </header>
 
-  <!-- Hero / īsā informācija -->
+  <!-- Sākumsekcija -->
   <main class="px-4 py-10">
     <section class="max-w-5xl mx-auto grid md:grid-cols-2 gap-6 items-stretch">
       <div class="rounded-2xl bg-white p-6 shadow">
@@ -49,16 +43,7 @@ const PublicSummaryCards = defineAsyncComponent(
         </ul>
       </div>
 
-      <!-- Publiska statistika (no API /api/public/summary) -->
       <PublicSummaryCards />
     </section>
   </main>
 </template>
-
-<script lang="ts">
-export default {
-  components: {
-    PublicSummaryCards: (await import('@/pages/ficas/PublicSummaryCards.vue')).default
-  }
-}
-</script>
