@@ -2,25 +2,28 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Models\User;
-use Illuminate\Support\Facades\Hash;
-
-Route::post('/auth/token-login', function (Request $request) {
-    $request->validate(['email'=>'required|email','password'=>'required']);
-    $user = User::where('email',$request->email)->first();
-    if (!$user || !Hash::check($request->password, $user->password)) {
-        return response()->json(['message'=>'Invalid credentials'], 422);
-    }
-    $token = $user->createToken('spa')->plainTextToken;
-    return response()->json(['token'=>$token, 'user'=>$user]);
-});
-
-Route::middleware('auth:sanctum')->post('/auth/token-logout', function (Request $request) {
-    $request->user()->currentAccessToken()->delete();
-    return response()->json(['ok'=>true]);
-});
-
+use Illuminate\Support\Facades\DB;
 
 Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::get('/health', function () {
+    return response()->json([
+        'ok' => true,
+        'ts' => now()->toIso8601String(),
+    ]);
+});
+
+// api/routes/api.php (pievieno faila beigās)
+
+Route::get('/public/summary', function () {
+    return response()->json([
+        'users'         => (int) DB::table('users')->count(),
+        'sludinajumi'   => (int) DB::table('sludinajums')->count(),
+        'pieteikumi'    => (int) DB::table('pieteikums')->count(),
+        'parskati'      => (int) DB::table('parskats')->count(),
+        'apliecinajumi' => (int) DB::table('apliecinajums')->count(),
+    ]);
+});
+

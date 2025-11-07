@@ -1,41 +1,55 @@
 // web/src/stores/auth.ts
-import { defineStore } from "pinia";
-import { api } from "@/lib/http";
+import { defineStore } from 'pinia'
+import api from '@/lib/api'
 
-export const useAuth = defineStore("auth", {
-  state: () => ({ user: null as any }),
+type User = { id:number; name:string; email:string; role?:string }
+
+export const useAuth = defineStore('auth', {
+  state: () => ({
+    token: localStorage.getItem('bdus_token') as string | null,
+    user: null as User | null,
+    loading: false,
+    error: '' as string,
+  }),
   actions: {
-    async getUser() {
-      const { data } = await api.get("/api/user");
-      this.user = data;
-      return data;
+    async fetchUser() {
+      if (!this.token) { this.user = null; return }
+      const { data } = await api.get('/api/user')
+      this.user = data
     },
-    // Cookie (Sanctum + Breeze API)
-    async loginCookie(payload: { email: string; password: string }) {
-      await api.get("/sanctum/csrf-cookie");
-      await api.post("/login", payload);
-      return this.getUser();
+    async login(email: string, password: string) {
+      this.loading = true; this.error = ''
+      try {
+        const { data } = await api.post('/login', { email, password })
+        this.token = data.token
+        localStorage.setItem('bdus_token', data.token)
+        await this.fetchUser()
+      } catch (e:any) {
+        this.error = e?.response?.data?.message ?? 'Neizdevās pieteikties'
+        this.token = null; localStorage.removeItem('bdus_token')
+        this.user = null
+        throw e
+      } finally { this.loading = false }
     },
-    async registerCookie(payload: { name:string; email:string; password:string; password_confirmation:string }) {
-      await api.get("/sanctum/csrf-cookie");
-      await api.post("/register", payload);
-      return this.getUser();
+    async register(payload: { name:string; email:string; password:string; password_confirmation:string }) {
+      this.loading = true; this.error = ''
+      try {
+        const { data } = await api.post('/register', payload)
+        this.token = data.token
+        localStorage.setItem('bdus_token', data.token)
+        await this.fetchUser()
+      } catch (e:any) {
+        this.error = e?.response?.data?.message ?? 'Neizdevās reģistrēties'
+        this.token = null; localStorage.removeItem('bdus_token')
+        this.user = null
+        throw e
+      } finally { this.loading = false }
     },
-    async logoutCookie() {
-      await api.post("/logout");
-      this.user = null;
-    },
-    // Token (Bearer) — alternatīva
-    async loginToken(payload: { email: string; password: string }) {
-      const { data } = await api.post("/api/auth/token-login", payload);
-      localStorage.setItem("bdus_token", data.token);
-      this.user = data.user;
-      return data.user;
-    },
-    async logoutToken() {
-      await api.post("/api/auth/token-logout");
-      localStorage.removeItem("bdus_token");
-      this.user = null;
+    async logout() {
+      try { await api.post('/logout') } catch {}
+      this.user = null
+      this.token = null
+      localStorage.removeItem('bdus_token')
     },
   },
-});
+})

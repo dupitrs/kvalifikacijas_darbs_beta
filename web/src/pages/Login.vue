@@ -1,39 +1,80 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import { useAuth } from "@/stores/auth";
-import { useRouter } from "vue-router";
+import { ref } from 'vue'
+import { useRouter, RouterLink } from 'vue-router'
+import { useAuth } from '@/stores/auth'
 
-const email = ref(""); const password = ref("");
-const mode = ref<"cookie"|"token">("cookie");
-const auth = useAuth(); const router = useRouter();
+const email = ref('')
+const password = ref('')
+const show = ref(false)
 
-async function submit() {
-  if (mode.value === "cookie") await auth.loginCookie({ email: email.value, password: password.value });
-  else await auth.loginToken({ email: email.value, password: password.value });
-  router.push("/");
+const auth = useAuth()
+const router = useRouter()
+
+const submit = async () => {
+  try {
+    await auth.login(email.value, password.value)
+    router.push({ name: 'home' })
+  } catch {/* auth.error already set */}
 }
 </script>
 
 <template>
-  <div class="min-h-screen grid place-items-center p-6 bg-gray-50">
-    <form @submit.prevent="submit" class="bg-white p-6 rounded-2xl shadow w-full max-w-sm space-y-4">
-      <h1 class="text-2xl font-bold">Login</h1>
-      <label class="block">
-        <span class="text-sm">Email</span>
-        <input v-model="email" type="email" class="mt-1 w-full border rounded px-3 py-2" required />
-      </label>
-      <label class="block">
-        <span class="text-sm">Password</span>
-        <input v-model="password" type="password" class="mt-1 w-full border rounded px-3 py-2" required />
-      </label>
-      <div class="flex items-center gap-2 text-sm">
-        <span>Mode:</span>
-        <select v-model="mode" class="border rounded px-2 py-1">
-          <option value="cookie">Sanctum (cookie)</option>
-          <option value="token">Token (Bearer)</option>
-        </select>
+  <div class="min-h-screen grid place-items-center px-4"
+       style="background: radial-gradient(60% 80% at 50% 0%, #ffffff 0%, #faf7f0 60%, #efe8db 100%);">
+    <div class="flex flex-col items-center gap-6 w-full">
+      <!-- Top brand -->
+      <div class="text-center">
+        <div class="mx-auto mb-3 h-12 w-12 rounded-full bg-[color:var(--mpp-primary,#4F7942)]/15 grid place-items-center">
+          <span class="text-[color:var(--mpp-primary,#4F7942)] font-bold text-xl">MPP</span>
+        </div>
+        <h1 class="text-2xl font-semibold text-[color:var(--mpp-dark,#2B2A28)]">Mums pieder pasaule</h1>
+        <p class="text-neutral-600">Brīvprātīgā darba uzskaite</p>
       </div>
-      <button class="w-full rounded-xl py-2 border">Sign in</button>
-    </form>
+
+      <!-- Card -->
+      <div class="w-full max-w-md bg-white shadow rounded-2xl p-6">
+        <h2 class="text-xl font-semibold mb-4">Pieslēgties</h2>
+
+        <form class="space-y-4" @submit.prevent="submit">
+          <div>
+            <label class="block mb-1 text-sm">E-pasts</label>
+            <input v-model="email" type="email" required
+                   class="w-full rounded-2xl border px-4 py-2 outline-none focus:ring focus:ring-[color:var(--mpp-primary,#4F7942)]/20"
+                   placeholder="piemers@epasts.lv" />
+          </div>
+
+          <div>
+            <label class="block mb-1 text-sm">Parole</label>
+            <div class="relative">
+              <input :type="show ? 'text' : 'password'"
+                     v-model="password" required
+                     class="w-full rounded-2xl border px-4 py-2 pr-20 outline-none focus:ring focus:ring-[color:var(--mpp-primary,#4F7942)]/20"
+                     placeholder="••••••••" />
+              <button type="button"
+                      class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[color:var(--mpp-secondary,#C5A572)]"
+                      @click="show = !show">
+                {{ show ? 'Slēpt' : 'Rādīt' }}
+              </button>
+            </div>
+          </div>
+
+          <button class="w-full inline-flex items-center justify-center px-4 py-2 rounded-2xl font-semibold
+                         bg-[color:var(--mpp-primary,#4F7942)] text-white hover:opacity-90"
+                  :disabled="auth.loading">
+            {{ auth.loading ? 'Pieslēdzas…' : 'Pieslēgties' }}
+          </button>
+
+          <p v-if="auth.error" class="text-red-600 text-sm">{{ auth.error }}</p>
+        </form>
+
+        <div class="mt-4 text-sm">
+          Nav profila?
+          <RouterLink class="font-semibold text-[color:var(--mpp-secondary,#C5A572)] underline"
+                      :to="{ name: 'register' }">Reģistrējies</RouterLink>
+        </div>
+      </div>
+
+      <p class="text-xs text-neutral-500">© {{ new Date().getFullYear() }} MPP</p>
+    </div>
   </div>
 </template>
