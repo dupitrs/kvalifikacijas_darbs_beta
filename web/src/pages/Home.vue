@@ -12,7 +12,7 @@ const auth = useAuth()
       <div class="h-8 w-8 rounded-full bg-emerald-700/15 grid place-items-center">
         <span class="text-emerald-700 font-bold text-sm">MPP</span>
       </div>
-      <span class="font-semibold text-neutral-800">Mums pieder pasaule · BDUS2</span>
+      <span class="font-semibold text-neutral-800">Mums pieder pasaule</span>
     </div>
 
     <nav class="flex items-center gap-3">
