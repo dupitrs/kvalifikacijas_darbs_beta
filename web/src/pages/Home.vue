@@ -1,8 +1,15 @@
 <!-- web/src/pages/Home.vue -->
+<!-- web/src/pages/Home.vue -->
 <script setup lang="ts">
 import { useAuth } from '@/stores/auth'
+import { defineAsyncComponent } from 'vue'
+
 const auth = useAuth()
+const PublicSummaryCards = defineAsyncComponent(
+  () => import('@/pages/components/PublicSummaryCards.vue')
+)
 </script>
+
 
 <template>
   <!-- Top bar -->

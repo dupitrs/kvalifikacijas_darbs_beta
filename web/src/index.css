@@ -1,16 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* web/src/index.css – faila apakšā */
-@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;600&display=swap');
+
 
 :root {
   --mpp-bg: #F6F4EF;
   --mpp-dark: #2B2A28;
-  --mpp-primary: #4F7942;   /* zaļais */
-  --mpp-secondary: #C5A572; /* smilškrāsa */
-  --mpp-accent: #E4CFA3;    /* gaišs akcents */
+  --mpp-primary: #4F7942;
+  --mpp-secondary: #C5A572;
+  --mpp-accent: #E4CFA3;
 }
 
 body {
