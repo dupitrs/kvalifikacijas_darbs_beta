@@ -33,14 +33,8 @@ const auth = useAuth()
       <div class="rounded-2xl bg-white p-6 shadow">
         <h1 class="text-2xl font-semibold text-neutral-800 mb-2">Brīvprātīgā darba uzskaites sistēma</h1>
         <p class="text-neutral-600">
-          Šeit varēsi reģistrēties, pieteikties uz sludinājumiem, ievadīt nostrādātās stundas
-          un saņemt apliecinājumus. Ja vēl neesi ielogojies, izmanto augšā <em>Login</em> vai <em>Register</em>.
+          test
         </p>
-        <ul class="mt-4 space-y-2 text-neutral-700">
-          <li>• Pārskati stundas un aktivitātes</li>
-          <li>• Skaties pieejamos sludinājumus</li>
-          <li>• Ģenerē apliecinājumu PDF</li>
-        </ul>
       </div>
 
       <PublicSummaryCards />
