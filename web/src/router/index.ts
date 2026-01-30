@@ -1,29 +1,27 @@
-// web/src/router/index.ts
-import { createRouter, createWebHistory } from 'vue-router'
-import { useAuth } from '@/stores/auth'
+import { createRouter, createWebHistory } from "vue-router";
+import Home from "../pages/Home.vue";
+import Login from "../pages/Login.vue";
+import Register from "../pages/Register.vue";
+import About from "../pages/About.vue";
+import { useAuthStore } from "../stores/auth";
 
-const Home = () => import('@/pages/Home.vue')
-const About = () => import('@/pages/About.vue')
-const Login = () => import('@/pages/Login.vue')
-const Register = () => import('@/pages/Register.vue')
-
-// web/src/router/index.ts (fragment)
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    { path: '/', name: 'home', component: () => import('@/pages/Home.vue') }, // publiska
-    { path: '/about', name: 'about', component: () => import('@/pages/About.vue'), meta: { requiresAuth: true } },
-    { path: '/login', name: 'login', component: () => import('@/pages/Login.vue'), meta: { guestOnly: true } },
-    { path: '/register', name: 'register', component: () => import('@/pages/Register.vue'), meta: { guestOnly: true } },
+    { path: "/", name: "home", component: Home },
+    { path: "/about", name: "about", component: About },
+    { path: "/login", name: "login", component: Login },
+    { path: "/register", name: "register", component: Register },
   ],
-})
+});
 
-router.beforeEach(async (to) => {
-  const auth = useAuth()
-  if (auth.token && !auth.user) { try { await auth.fetchUser() } catch {} }
-  if (to.meta.requiresAuth && !auth.token) return { name: 'login' }
-  if (to.meta.guestOnly && auth.token)  return { name: 'home' }
-  return true
-})
+// (optional) ja vēlāk taisi protected routes
+router.beforeEach((to) => {
+  const auth = useAuthStore();
+  const protectedNames = ["home"]; // piem., vēlāk "parskats", "profil"
+  if (protectedNames.includes(to.name as string) && !auth.token) {
+    return { name: "login", query: { redirect: to.fullPath } };
+  }
+});
 
-export default router
+export default router;

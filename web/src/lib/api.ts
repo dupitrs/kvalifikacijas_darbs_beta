@@ -1,15 +1,16 @@
-// web/src/lib/api.ts
-import axios from 'axios'
+import { http } from "./http";
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-  withCredentials: false, // jo lietosim Bearer tokenu, nevis cookies
-})
-
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('bdus_token')
-  if (token) config.headers.Authorization = `Bearer ${token}`
-  return config
-})
-
-export default api
+export const api = {
+  register(data: { vards: string; uzvards?: string; epasts: string; parole: string }) {
+    return http.post("/register", data);
+  },
+  login(data: { epasts: string; parole: string }) {
+    return http.post("/login", data);
+  },
+  me() {
+    return http.get("/user");
+  },
+  logout() {
+    return http.post("/logout");
+  },
+};

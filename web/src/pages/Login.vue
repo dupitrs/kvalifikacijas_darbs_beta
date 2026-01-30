@@ -1,80 +1,60 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter, RouterLink } from 'vue-router'
-import { useAuth } from '@/stores/auth'
+import { reactive } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import { useAuthStore } from "../stores/auth";
 
-const email = ref('')
-const password = ref('')
-const show = ref(false)
+const router = useRouter();
+const route = useRoute();
+const auth = useAuthStore();
 
-const auth = useAuth()
-const router = useRouter()
+const form = reactive({ epasts: "", parole: "" });
 
-const submit = async () => {
-  try {
-    await auth.login(email.value, password.value)
-    router.push({ name: 'home' })
-  } catch {/* auth.error already set */}
+async function submit() {
+  auth.error = "";
+  await auth.login({
+    epasts: form.epasts.trim().toLowerCase(),
+    parole: form.parole,
+  });
+
+  const redirect = (route.query.redirect as string) || "/";
+  router.push(redirect);
 }
 </script>
 
 <template>
-  <div class="min-h-screen grid place-items-center px-4"
-       style="background: radial-gradient(60% 80% at 50% 0%, #ffffff 0%, #faf7f0 60%, #efe8db 100%);">
-    <div class="flex flex-col items-center gap-6 w-full">
-      <!-- Top brand -->
-      <div class="text-center">
-        <div class="mx-auto mb-3 h-12 w-12 rounded-full bg-[color:var(--mpp-primary,#4F7942)]/15 grid place-items-center">
-          <span class="text-[color:var(--mpp-primary,#4F7942)] font-bold text-xl">MPP</span>
-        </div>
-        <h1 class="text-2xl font-semibold text-[color:var(--mpp-dark,#2B2A28)]">Mums pieder pasaule</h1>
-        <p class="text-neutral-600">Brīvprātīgā darba uzskaite</p>
+  <div class="mx-auto max-w-md">
+    <section class="card p-6 lg:p-8">
+      <div class="inline-flex items-center gap-2 rounded-full bg-mpp-mint/40 px-3 py-1 text-sm font-semibold text-mpp-teal">
+        Welcome back
       </div>
 
-      <!-- Card -->
-      <div class="w-full max-w-md bg-white shadow rounded-2xl p-6">
-        <h2 class="text-xl font-semibold mb-4">Pieslēgties</h2>
+      <h1 class="mt-3 text-2xl font-extrabold text-mpp-ink">Ielogošanās</h1>
+      <p class="text-sm text-mpp-ink/60 mt-1">Ievadi e-pastu un paroli.</p>
 
-        <form class="space-y-4" @submit.prevent="submit">
-          <div>
-            <label class="block mb-1 text-sm">E-pasts</label>
-            <input v-model="email" type="email" required
-                   class="w-full rounded-2xl border px-4 py-2 outline-none focus:ring focus:ring-[color:var(--mpp-primary,#4F7942)]/20"
-                   placeholder="piemers@epasts.lv" />
-          </div>
-
-          <div>
-            <label class="block mb-1 text-sm">Parole</label>
-            <div class="relative">
-              <input :type="show ? 'text' : 'password'"
-                     v-model="password" required
-                     class="w-full rounded-2xl border px-4 py-2 pr-20 outline-none focus:ring focus:ring-[color:var(--mpp-primary,#4F7942)]/20"
-                     placeholder="••••••••" />
-              <button type="button"
-                      class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[color:var(--mpp-secondary,#C5A572)]"
-                      @click="show = !show">
-                {{ show ? 'Slēpt' : 'Rādīt' }}
-              </button>
-            </div>
-          </div>
-
-          <button class="w-full inline-flex items-center justify-center px-4 py-2 rounded-2xl font-semibold
-                         bg-[color:var(--mpp-primary,#4F7942)] text-white hover:opacity-90"
-                  :disabled="auth.loading">
-            {{ auth.loading ? 'Pieslēdzas…' : 'Pieslēgties' }}
-          </button>
-
-          <p v-if="auth.error" class="text-red-600 text-sm">{{ auth.error }}</p>
-        </form>
-
-        <div class="mt-4 text-sm">
-          Nav profila?
-          <RouterLink class="font-semibold text-[color:var(--mpp-secondary,#C5A572)] underline"
-                      :to="{ name: 'register' }">Reģistrējies</RouterLink>
+      <form class="mt-6 space-y-4" @submit.prevent="submit">
+        <div>
+          <div class="label">E-pasts</div>
+          <input v-model="form.epasts" type="email" class="input" required />
         </div>
-      </div>
 
-      <p class="text-xs text-neutral-500">© {{ new Date().getFullYear() }} MPP</p>
-    </div>
+        <div>
+          <div class="label">Parole</div>
+          <input v-model="form.parole" type="password" class="input" required />
+        </div>
+
+        <div v-if="auth.error" class="rounded-xl border border-mpp-red/20 bg-mpp-red/5 p-3 text-sm text-mpp-ink">
+          {{ auth.error }}
+        </div>
+
+        <button class="btn-primary w-full" type="submit" :disabled="auth.loading">
+          {{ auth.loading ? "Ielogojas..." : "Ielogoties" }}
+        </button>
+
+        <div class="text-sm text-mpp-ink/70">
+          Nav konta?
+          <router-link class="font-semibold text-mpp-teal hover:underline" :to="{ name: 'register' }">Reģistrēties</router-link>
+        </div>
+      </form>
+    </section>
   </div>
 </template>

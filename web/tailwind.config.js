@@ -1,33 +1,26 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
-  content: ["./index.html", "./src/**/*.{vue,ts,tsx}"],
-  theme: {
-    extend: {},
-  },
-  plugins: [],
-};
- // tailwind.config.js  (ja tev ir .ts – saturs tas pats)
 export default {
-  content: ['./index.html','./src/**/*.{vue,ts,js}'],
+  content: ["./index.html", "./src/**/*.{vue,js,ts,jsx,tsx}"],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["'Plus Jakarta Sans'", "ui-sans-serif", "system-ui"],
+      },
       colors: {
         mpp: {
-          bg: '#F6F4EF',
-          dark: '#2B2A28',
-          primary: '#4F7942',
-          secondary: '#C5A572',
-          accent: '#E4CFA3',
-          error: '#E24A4A',
+          red: "#C71616",
+          orange: "#F66B1A",
+          teal: "#08A398",
+          mint: "#B3EFEB",
+          green: "#ADE9A1",
+          ink: "#0F172A",     // tumšais teksts
+          paper: "#F6FBFA",   // fons
         },
       },
-      fontFamily: {
-        display: ['"Josefin Sans"', 'ui-sans-serif', 'system-ui'],
-        body: ['"Josefin Sans"', 'ui-sans-serif', 'system-ui'],
+      boxShadow: {
+        soft: "0 10px 30px rgba(15, 23, 42, 0.10)",
       },
-      boxShadow: { soft: '0 10px 24px rgba(0,0,0,0.08)' },
-      borderRadius: { 'xl2': '1.25rem' },
     },
   },
   plugins: [],
-}
+};

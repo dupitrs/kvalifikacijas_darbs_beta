@@ -1,22 +1,32 @@
-@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;600&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* web/src/index.css – faila apakšā */
-
-
-:root {
-  --mpp-bg: #F6F4EF;
-  --mpp-dark: #2B2A28;
-  --mpp-primary: #4F7942;
-  --mpp-secondary: #C5A572;
-  --mpp-accent: #E4CFA3;
+html, body {
+  font-family: "Plus Jakarta Sans", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: #F6FBFA; /* mpp paper */
 }
 
-body {
-  background: var(--mpp-bg);
-  color: var(--mpp-dark);
-  font-family: 'Josefin Sans', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+/* komponentu helperi */
+@layer components {
+  .card {
+    @apply rounded-2xl border border-black/5 bg-white shadow-soft;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center rounded-xl px-4 py-2 font-semibold transition;
+  }
+  .btn-primary {
+    @apply btn text-white bg-mpp-teal hover:opacity-90;
+  }
+  .btn-ghost {
+    @apply btn border border-black/10 hover:bg-black/5;
+  }
+
+  .input {
+    @apply w-full rounded-xl border border-black/10 bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-mpp-mint;
+  }
+  .label {
+    @apply text-sm font-semibold text-mpp-ink/80;
+  }
 }

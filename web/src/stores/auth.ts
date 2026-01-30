@@ -1,55 +1,56 @@
-// web/src/stores/auth.ts
-import { defineStore } from 'pinia'
-import api from '@/lib/api'
+import { defineStore } from "pinia";
+import { api } from "../lib/api";
 
-type User = { id:number; name:string; email:string; role?:string }
-
-export const useAuth = defineStore('auth', {
+export const useAuthStore = defineStore("auth", {
   state: () => ({
-    token: localStorage.getItem('bdus_token') as string | null,
-    user: null as User | null,
+    user: null as any,
+    token: localStorage.getItem("token") || "",
     loading: false,
-    error: '' as string,
+    error: "",
   }),
+
   actions: {
-    async fetchUser() {
-      if (!this.token) { this.user = null; return }
-      const { data } = await api.get('/api/user')
-      this.user = data
-    },
-    async login(email: string, password: string) {
-      this.loading = true; this.error = ''
+    async register(payload: { vards: string; uzvards?: string; epasts: string; parole: string }) {
+      this.loading = true; this.error = "";
       try {
-        const { data } = await api.post('/login', { email, password })
-        this.token = data.token
-        localStorage.setItem('bdus_token', data.token)
-        await this.fetchUser()
-      } catch (e:any) {
-        this.error = e?.response?.data?.message ?? 'Neizdevās pieteikties'
-        this.token = null; localStorage.removeItem('bdus_token')
-        this.user = null
-        throw e
-      } finally { this.loading = false }
+        const res = await api.register(payload);
+        this.token = res.data.token;
+        localStorage.setItem("token", this.token);
+        this.user = res.data.user;
+      } catch (e: any) {
+        this.error = e?.response?.data?.message || "Register error";
+        throw e;
+      } finally {
+        this.loading = false;
+      }
     },
-    async register(payload: { name:string; email:string; password:string; password_confirmation:string }) {
-      this.loading = true; this.error = ''
+
+    async login(payload: { epasts: string; parole: string }) {
+      this.loading = true; this.error = "";
       try {
-        const { data } = await api.post('/register', payload)
-        this.token = data.token
-        localStorage.setItem('bdus_token', data.token)
-        await this.fetchUser()
-      } catch (e:any) {
-        this.error = e?.response?.data?.message ?? 'Neizdevās reģistrēties'
-        this.token = null; localStorage.removeItem('bdus_token')
-        this.user = null
-        throw e
-      } finally { this.loading = false }
+        const res = await api.login(payload);
+        this.token = res.data.token;
+        localStorage.setItem("token", this.token);
+        this.user = res.data.user;
+      } catch (e: any) {
+        this.error = e?.response?.data?.message || "Login error";
+        throw e;
+      } finally {
+        this.loading = false;
+      }
     },
+
+    async fetchMe() {
+      if (!this.token) return;
+      const res = await api.me();
+      this.user = res.data;
+    },
+
     async logout() {
-      try { await api.post('/logout') } catch {}
-      this.user = null
-      this.token = null
-      localStorage.removeItem('bdus_token')
+      try { await api.logout(); } catch {}
+      this.token = "";
+      this.user = null;
+      localStorage.removeItem("token");
     },
   },
-})
+});

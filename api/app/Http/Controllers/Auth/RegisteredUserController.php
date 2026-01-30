@@ -6,36 +6,47 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules;
 
 class RegisteredUserController extends Controller
 {
-    /**
-     * Handle an incoming registration request.
-     *
-     * @throws \Illuminate\Validation\ValidationException
-     */
-    public function store(Request $request): Response
+    public function store(\Illuminate\Http\Request $request)
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        $validated = $request->validate([
+            'vards' => ['required', 'string', 'max:100'],
+            'uzvards' => ['required', 'string', 'max:100'],
+            'epasts' => ['required', 'string', 'email', 'max:150', 'unique:lietotaji,epasts'],
+            'parole' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->string('password')),
+        $user = \App\Models\User::create([
+            'vards' => $validated['vards'],
+            'uzvards' => $validated['uzvards'],
+            'epasts' => $validated['epasts'],
+            'parole' => \Illuminate\Support\Facades\Hash::make($validated['parole']),
+            'loma' => 'lietotajs',
+            'punkti' => 0,
+            'blokets' => 0,
+            // limenis_id atstāj null, ja nav obligāts
         ]);
 
-        event(new Registered($user));
+        // ja gribi uzreiz ielogot pēc reģistrācijas:
+        \Illuminate\Support\Facades\Auth::login($user);
 
-        Auth::login($user);
+        // ja izmanto Sanctum tokenus:
+        $token = $user->createToken('api')->plainTextToken;
 
-        return response()->noContent();
+        return response()->json([
+            'message' => 'Registered',
+            'token' => $token,
+            'user' => [
+                'id' => $user->id,
+                'vards' => $user->vards,
+                'uzvards' => $user->uzvards,
+                'epasts' => $user->epasts,
+                'loma' => $user->loma,
+            ],
+        ], 201);
     }
+
 }

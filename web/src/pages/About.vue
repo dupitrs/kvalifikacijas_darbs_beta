@@ -1,6 +1,8 @@
 <template>
-  <main class="p-6">
-    <h1 class="text-3xl font-bold text-green-600">Par projektu</h1>
-    <router-link to="/" class="text-indigo-600 underline">← Atpakaļ uz sākumu</router-link>
-  </main>
+  <div class="p-6 max-w-3xl mx-auto">
+    <h1 class="text-2xl font-bold">Par BDUS</h1>
+    <p class="mt-2 opacity-70">
+      Šī ir test lapa. Te vēlāk būs apraksts un instrukcijas lietotājiem.
+    </p>
+  </div>
 </template>
