@@ -39,5 +39,34 @@ onMounted(async () => {
         </div>
       </div>
     </div>
+<<<<<<< HEAD
   </div>
+=======
+
+    <nav class="flex items-center gap-3">
+      <template v-if="!auth.user">
+        <router-link to="/login" class="px-3 py-1.5 rounded-xl border hover:bg-neutral-50">Login</router-link>
+        <router-link to="/register" class="px-3 py-1.5 rounded-xl bg-emerald-700 text-white hover:opacity-90">Register</router-link>
+      </template>
+      <template v-else>
+        <span class="text-sm text-neutral-600">Sveiks, <strong>{{ auth.user.name }}</strong></span>
+        <button class="px-3 py-1.5 rounded-xl border hover:bg-neutral-50" @click="auth.logout">Izrakstīties</button>
+      </template>
+    </nav>
+  </header>
+
+  <!-- Sākumsekcija -->
+  <main class="px-4 py-10">
+    <section class="max-w-5xl mx-auto grid md:grid-cols-2 gap-6 items-stretch">
+      <div class="rounded-2xl bg-white p-6 shadow">
+        <h1 class="text-2xl font-semibold text-neutral-800 mb-2">Brīvprātīgā darba uzskaites sistēma</h1>
+        <p class="text-neutral-600">
+          test
+        </p>
+      </div>
+
+      <PublicSummaryCards />
+    </section>
+  </main>
+>>>>>>> 5dddf220957272e841f9eeea7b33eefd02063c7d
 </template>
