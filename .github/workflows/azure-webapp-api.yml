@@ -1,12 +1,20 @@
+name: Deploy Laravel API to Azure Web App
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "api/**"
+      - ".github/workflows/azure-webapp-api.yml"
+  workflow_dispatch:
+
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -14,25 +22,33 @@ jobs:
           php-version: "8.2"
           tools: composer
 
-      - name: Install deps
+      - name: Install Composer dependencies (api)
         working-directory: api
-        run: composer install --no-dev --optimize-autoloader
-
-      - name: Build zip
         run: |
-          cd api
-          zip -r ../api.zip . -x ".env"
+          composer install --no-interaction --prefer-dist --no-dev --optimize-autoloader
 
-      - name: Login to Azure
-        uses: azure/login@v2
+      # (nepalaižam php artisan šeit, jo production .env / APP_KEY būs Azure App Settings)
+
+      - name: Upload artifact (api)
+        uses: actions/upload-artifact@v4
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_D7A8FE40DB8C417FA00E0081C9E3CC5C }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_5D3A32569E5640048D5A0EDA044E4180 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_A2B1A67E5C6946CDB020397C7CF13B25 }}
+          name: api-build
+          path: api
 
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
 
-      - name: Deploy
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: api-build
+          path: api
+
+      - name: Deploy to Azure Web App (mppbd)
         uses: azure/webapps-deploy@v3
         with:
-          app-name: mppbd
-          package: api.zip
+          app-name: "mppbd"
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: api
