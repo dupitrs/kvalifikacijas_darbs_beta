@@ -1,15 +1,9 @@
-name: Deploy Laravel API to Azure Web App
-
-on:
-  push:
-    branches: [ "main" ]
-    paths:
-      - "api/**"
-      - ".github/workflows/azure-webapp-api.yml"
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
@@ -18,26 +12,25 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: "8.2"
-          extensions: mbstring, pdo_mysql, openssl
           tools: composer
 
       - name: Install deps
         working-directory: api
         run: composer install --no-dev --optimize-autoloader
 
-      - name: Build zip (ONLY api)
+      - name: Build zip
         run: |
           cd api
-          zip -r ../api.zip . -x ".env" ".env.*" "node_modules/*"
+          zip -r ../api.zip . -x ".env"
 
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_D7A8FE40DB8C417FA00E0081C9E3CC5C }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_5D3A32569E5640048D5A0EDA044E4180 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_A2B1A67E5C6946CDB020397C7CF13B25 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_... }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_... }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_... }}
 
-      - name: Deploy zip to Web App
+      - name: Deploy
         uses: azure/webapps-deploy@v3
         with:
           app-name: mppbd
