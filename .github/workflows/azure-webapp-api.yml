@@ -1,0 +1,39 @@
+name: Deploy Laravel API to Azure Web App
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "api/**"
+      - ".github/workflows/azure-webapp-api.yml"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: mbstring, pdo, pdo_pgsql, openssl
+          tools: composer
+
+      - name: Install Composer deps
+        working-directory: api
+        run: composer install --no-dev --optimize-autoloader
+
+      - name: Zip artifact (only /api)
+        run: |
+          cd api
+          zip -r ../api.zip . -x "node_modules/*" ".env" ".env.*"
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: mppbd
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: api.zip
