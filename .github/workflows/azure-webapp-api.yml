@@ -2,14 +2,18 @@ name: Deploy Laravel API to Azure Web App
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
     paths:
       - "api/**"
       - ".github/workflows/azure-webapp-api.yml"
-  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,35 +24,34 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: "8.2"
-          tools: composer
+          tools: composer:v2
 
-      - name: Install Composer dependencies (api)
+      - name: Install dependencies (composer)
+        working-directory: api
+        run: composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
+
+      - name: Prepare Laravel (caches)
         working-directory: api
         run: |
-          composer install --no-interaction --prefer-dist --no-dev --optimize-autoloader
+          php artisan optimize:clear
+          php artisan config:cache
+          php artisan route:cache
 
-      # (nepalaižam php artisan šeit, jo production .env / APP_KEY būs Azure App Settings)
+      # ZIP taisām TIEŠI no api mapes satura, lai wwwroot saknē ir artisan/public/etc
+      - name: Create deployment package
+        run: |
+          cd api
+          zip -r ../release.zip . -x ".env" -x ".env.*" -x "tests/*" -x ".git/*" -x ".github/*"
 
-      - name: Upload artifact (api)
-        uses: actions/upload-artifact@v4
+      - name: Login to Azure (OIDC)
+        uses: azure/login@v2
         with:
-          name: api-build
-          path: api
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID }}
 
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: api-build
-          path: api
-
-      - name: Deploy to Azure Web App (mppbd)
+      - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: "mppbd"
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: api
+          app-name: mppbd
+          package: release.zip

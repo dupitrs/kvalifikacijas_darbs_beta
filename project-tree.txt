@@ -5,9 +5,13 @@ C:.
 |   project-tree.txt
 |   README.md
 |   
++---.devcontainer
+|       devcontainer.json
+|       
 +---.github
 |   \---workflows
 |           azure-static-web-apps-mango-mushroom-0baec9d03.yml
+|           azure-webapp-api.yml
 |           
 +---api
 |   |   .editorconfig
@@ -123,6 +127,7 @@ C:.
 |   |   |   |           
 |   |   |   +---sessions
 |   |   |   |       .gitignore
+|   |   |   |       DCa4YbfLgGyWDT8nhBgCDombSEZLomzp0XNl8X4I
 |   |   |   |       VMKiWpnnHFA6LTT8OTswLvlFoF7yDsFkMs72mk1r
 |   |   |   |       
 |   |   |   +---testing
