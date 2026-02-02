@@ -30,13 +30,6 @@ jobs:
         working-directory: api
         run: composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
 
-      - name: Prepare Laravel (no DB)
-        working-directory: api
-        run: |
-          php artisan config:clear
-          php artisan route:clear
-          php artisan view:clear
-
 
       # ZIP taisām TIEŠI no api mapes satura, lai wwwroot saknē ir artisan/public/etc
       - name: Create deployment package
