@@ -4,6 +4,20 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use Illuminate\Support\Facades\DB;
+
+Route::get('/dbtest', function () {
+    try {
+        DB::connection()->getPdo();
+        return response()->json(['db' => 'ok']);
+    } catch (\Throwable $e) {
+        return response()->json([
+            'db' => 'fail',
+            'error' => $e->getMessage(),
+        ], 500);
+    }
+});
+
 
 Route::get('/whoami', function () {
     return response()->json([
