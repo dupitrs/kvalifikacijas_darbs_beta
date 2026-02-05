@@ -28,14 +28,26 @@ jobs:
 
       - name: Install dependencies (composer)
         working-directory: api
-        run: composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
+        run: |
+          composer install \
+            --no-dev \
+            --prefer-dist \
+            --no-interaction \
+            --no-progress \
+            --optimize-autoloader
 
-
-      # ZIP taisām TIEŠI no api mapes satura, lai wwwroot saknē ir artisan/public/etc
+      # ZIP taisām TIEŠI no api mapes satura (lai wwwroot saknē ir artisan/public/etc)
       - name: Create deployment package
         run: |
           cd api
-          zip -r ../release.zip . -x ".env" -x ".env.*" -x "tests/*" -x ".git/*" -x ".github/*"
+          zip -r ../release.zip . \
+            -x ".env" \
+            -x ".env.*" \
+            -x "tests/**" \
+            -x ".git/**" \
+            -x ".github/**" \
+            -x "node_modules/**" \
+            -x "storage/logs/**"
 
       - name: Login to Azure (OIDC)
         uses: azure/login@v2
