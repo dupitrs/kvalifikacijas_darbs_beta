@@ -32,10 +32,12 @@ Route::get('/ping', function () {
     return response()->json(['ok' => true]);
 });
 
-Route::post('/register', [RegisteredUserController::class, 'store']);
-Route::post('/login', [AuthenticatedSessionController::class, 'store']);
-Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
-    ->middleware('auth:sanctum');
+Route::prefix('auth')->group(function () {
+    Route::post('/register', [RegisteredUserController::class, 'store']);
+    Route::post('/login', [AuthenticatedSessionController::class, 'store']);
+    Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
+        ->middleware('auth:sanctum');
+});
 
 Route::get('/user', function (Request $request) {
     return $request->user();
