@@ -3,7 +3,10 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return ['Laravel' => app()->version()];
+    return response()->json([
+        'service' => 'BDUS API',
+        'status' => 'ok',
+        'version' => app()->version(),
+    ]);
 });
-
-require __DIR__.'/auth.php';
+ 
