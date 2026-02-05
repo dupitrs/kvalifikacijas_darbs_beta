@@ -40,3 +40,16 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
+
+
+Route::any('/echo', function (Request $r) {
+    return response()->json([
+        'method' => $r->method(),
+        'content_type' => $r->header('content-type'),
+        'accept' => $r->header('accept'),
+        'raw' => $r->getContent(),
+        'all' => $r->all(),
+        'json_all' => $r->json()->all(),
+        'has_json' => $r->isJson(),
+    ]);
+});
