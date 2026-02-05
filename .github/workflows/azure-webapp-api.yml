@@ -36,7 +36,7 @@ jobs:
             --no-progress \
             --optimize-autoloader
 
-      # ZIP taisām TIEŠI no api mapes satura (lai wwwroot saknē ir artisan/public/etc)
+      # ZIP taisām TIEŠI no api mapes satura (lai wwwroot saknē ir artisan/public/etc.)
       - name: Create deployment package
         run: |
           cd api
