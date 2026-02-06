@@ -8,6 +8,14 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Artisan;
 
 
+Route::get('/_clear', function () {
+    Artisan::call('optimize:clear');
+    return response()->json([
+        'ok' => true,
+        'output' => Artisan::output(),
+    ]);
+});
+
 Route::get('/dbtest', function () {
     try {
         DB::connection()->getPdo();
