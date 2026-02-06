@@ -55,3 +55,7 @@ Route::any('/echo', function (Request $r) {
         'has_json' => $r->isJson(),
     ]);
 });
+
+Route::post('/login-test', function () {
+    return response()->json(['ok' => true]);
+});
