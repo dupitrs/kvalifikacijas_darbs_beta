@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Artisan;
+
 
 Route::get('/dbtest', function () {
     try {
@@ -58,4 +60,10 @@ Route::any('/echo', function (Request $r) {
 
 Route::post('/login-test', function () {
     return response()->json(['ok' => true]);
+});
+
+
+Route::get('/_clear', function () {
+    Artisan::call('optimize:clear');
+    return response()->json(['ok' => true, 'output' => Artisan::output()]);
 });
