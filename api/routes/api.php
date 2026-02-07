@@ -7,6 +7,13 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Artisan;
 
+Route::get('/version', function () {
+    return response()->json([
+        'version' => '2026-02-06-01',
+        'time' => now()->toDateTimeString(),
+    ]);
+});
+
 
 Route::get('/_clear', function () {
     Artisan::call('optimize:clear');
@@ -75,3 +82,4 @@ Route::get('/_clear', function () {
     Artisan::call('optimize:clear');
     return response()->json(['ok' => true, 'output' => Artisan::output()]);
 });
+
