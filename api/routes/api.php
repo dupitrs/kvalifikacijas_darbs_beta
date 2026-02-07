@@ -78,8 +78,8 @@ Route::post('/login-test', function () {
 });
 
 
-Route::get('/_clear', function () {
-    Artisan::call('optimize:clear');
-    return response()->json(['ok' => true, 'output' => Artisan::output()]);
-});
+
+
+
+
 
