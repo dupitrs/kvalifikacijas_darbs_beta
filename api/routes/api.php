@@ -15,13 +15,20 @@ Route::get('/version', function () {
 });
 
 
-Route::get('/_clear', function () {
+
+Route::get('/clear', function () {
     Artisan::call('optimize:clear');
+    Artisan::call('route:clear');
+    Artisan::call('config:clear');
+    Artisan::call('cache:clear');
+
     return response()->json([
         'ok' => true,
         'output' => Artisan::output(),
+        'time' => now()->toDateTimeString(),
     ]);
 });
+
 
 Route::get('/dbtest', function () {
     try {
