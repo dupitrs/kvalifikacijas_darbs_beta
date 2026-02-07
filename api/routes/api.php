@@ -103,3 +103,18 @@ Route::get('/routes-check', function () {
 });
 
 
+Route::get('/_routes', function () {
+    $routes = collect(Route::getRoutes())->map(function ($r) {
+        return [
+            'methods' => $r->methods(),
+            'uri'     => $r->uri(),
+            'action'  => $r->getActionName(),
+        ];
+    });
+
+    return response()->json([
+        'count' => $routes->count(),
+        'auth'  => $routes->filter(fn($x) => str_contains($x['uri'], 'api/auth'))->values(),
+        'api'   => $routes->filter(fn($x) => str_starts_with($x['uri'], 'api/'))->take(60)->values(),
+    ]);
+});
