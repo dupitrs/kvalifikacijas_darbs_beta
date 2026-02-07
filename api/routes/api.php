@@ -77,6 +77,9 @@ Route::post('/login-test', function () {
     return response()->json(['ok' => true]);
 });
 
+Route::post('/auth/login2', function () {
+    return response()->json(['hit' => true]);
+});
 
 
 
