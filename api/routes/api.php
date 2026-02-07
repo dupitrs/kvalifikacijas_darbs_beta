@@ -90,6 +90,25 @@ Route::post('/auth/login2', function () {
 
 
 
+use Illuminate\Support\Facades\Route as RouteFacade;
+
+Route::get('/routes-check', function () {
+    $want = [
+        'api/auth/login',
+        'api/auth/register',
+        'api/auth/logout',
+        'api/user',
+        'api/clear',
+    ];
+
+    $all = collect(RouteFacade::getRoutes())->map(function ($r) {
+        return $r->uri();
+    })->values();
+
+    return response()->json([
+        'has' => collect($want)->mapWithKeys(fn($u) => [$u => $all->contains($u)]),
+    ]);
+});
 
 
 
