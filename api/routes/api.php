@@ -11,18 +11,16 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 /*
 |--------------------------------------------------------------------------
-| API Routes
+| API Routes (JSON only)
 |--------------------------------------------------------------------------
-| Šeit ir tikai API maršruti. Viss atgriež JSON.
+| Šeit ir tikai API maršruti.
+| Piezīme: Azure vidē POST uz /api/auth/login dod nginx 404,
+| tāpēc login izmantojam /api/login.
 */
 
-Route::post('/session-login', [AuthenticatedSessionController::class, 'store']);
-
-Route::post('/post-ok', function () {
-    return response()->json(['ok' => true]);
-});
-
-
+// ----------------------------------------------------
+// Identitāte / veselības pārbaudes
+// ----------------------------------------------------
 
 Route::get('/rf', function () {
     return response()->json([
@@ -30,7 +28,6 @@ Route::get('/rf', function () {
         'time' => now()->toDateTimeString(),
     ]);
 });
-
 
 Route::get('/version', function () {
     return response()->json([
@@ -51,6 +48,10 @@ Route::get('/ping', function () {
     return response()->json(['ok' => true]);
 });
 
+// ----------------------------------------------------
+// DB tests
+// ----------------------------------------------------
+
 Route::get('/dbtest', function () {
     try {
         DB::connection()->getPdo();
@@ -63,6 +64,10 @@ Route::get('/dbtest', function () {
     }
 });
 
+// ----------------------------------------------------
+// Environment / paths
+// ----------------------------------------------------
+
 Route::get('/whoami', function () {
     return response()->json([
         'base_path' => base_path(),
@@ -74,11 +79,26 @@ Route::get('/whoami', function () {
     ]);
 });
 
-/**
- * ĻOTI JAUDĪGA diagnostika:
- * - pasaka vai kontrolieris eksistē runtime
- * - pasaka vai fails vispār ir serverī
- */
+// ----------------------------------------------------
+// Echo (debug: body/headers)
+// ----------------------------------------------------
+
+Route::any('/echo', function (Request $r) {
+    return response()->json([
+        'method' => $r->method(),
+        'content_type' => $r->header('content-type'),
+        'accept' => $r->header('accept'),
+        'raw' => $r->getContent(),
+        'all' => $r->all(),
+        'json_all' => $r->json()->all(),
+        'has_json' => $r->isJson(),
+    ]);
+});
+
+// ----------------------------------------------------
+// Diag: Auth controller esamība + tiešs izsaukums
+// ----------------------------------------------------
+
 Route::get('/diag/auth-controller', function () {
     $class = AuthenticatedSessionController::class;
 
@@ -89,10 +109,6 @@ Route::get('/diag/auth-controller', function () {
     ]);
 });
 
-/**
- * Tiešs kontroliera store() izsaukums bez Laravel routera action mapping.
- * Ja te krīt ar 500, tu redzēsi īsto kļūdu (un tā būs logā).
- */
 Route::post('/diag/auth-controller-call', function (Request $r) {
     $class = AuthenticatedSessionController::class;
 
@@ -107,12 +123,10 @@ Route::post('/diag/auth-controller-call', function (Request $r) {
 
         $controller = app($class);
         return $controller->store($r);
-
     } catch (\Throwable $e) {
         Log::error('diag/auth-controller-call failed', [
             'exception' => get_class($e),
             'message' => $e->getMessage(),
-            'trace' => $e->getTraceAsString(),
         ]);
 
         return response()->json([
@@ -123,17 +137,28 @@ Route::post('/diag/auth-controller-call', function (Request $r) {
     }
 });
 
-/**
- * Cache tīrīšana caur HTTP.
- * (Neliec production bez kāda "secret", bet šobrīd debuggingam OK.)
- */
-Route::get('/clear', function () {
+// ----------------------------------------------------
+// Cache clear (ar secret)
+// ----------------------------------------------------
+// Azure App Settings pievieno: CLEAR_SECRET=kkkkkkkk (jebkas)
+// Tad sauc: GET /api/clear?secret=kkkkkkkk
+Route::get('/clear', function (Request $r) {
+    $secret = env('CLEAR_SECRET');
+
+    if ($secret) {
+        if ($r->query('secret') !== $secret) {
+            return response()->json(['ok' => false, 'message' => 'forbidden'], 403);
+        }
+    } else {
+        // Ja secret nav uzlikts, tad drošības pēc aizliedzam
+        return response()->json([
+            'ok' => false,
+            'message' => 'CLEAR_SECRET not set in App Settings',
+        ], 403);
+    }
+
     try {
         Artisan::call('optimize:clear');
-        Artisan::call('route:clear');
-        Artisan::call('config:clear');
-        Artisan::call('cache:clear');
-
         return response()->json([
             'ok' => true,
             'time' => now()->toDateTimeString(),
@@ -152,41 +177,33 @@ Route::get('/clear', function () {
     }
 });
 
-/**
- * Echo - lai redzi, kas tieši atnāk body / headers.
- */
-Route::any('/echo', function (Request $r) {
-    return response()->json([
-        'method' => $r->method(),
-        'content_type' => $r->header('content-type'),
-        'accept' => $r->header('accept'),
-        'raw' => $r->getContent(),
-        'all' => $r->all(),
-        'json_all' => $r->json()->all(),
-        'has_json' => $r->isJson(),
-    ]);
-});
+// ----------------------------------------------------
+// AUTH
+// ----------------------------------------------------
 
-/**
- * AUTH
- */
+// ✅ GALVENAIS LOGIN ceļš (Azure dēļ)
+Route::post('/login', [AuthenticatedSessionController::class, 'store']);
+
+// Reģistrācija var palikt zem /auth/register
 Route::prefix('auth')->group(function () {
     Route::post('/register', [RegisteredUserController::class, 'store']);
-    Route::post('/login', [AuthenticatedSessionController::class, 'store']);
+
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
         ->middleware('auth:sanctum');
 });
 
-/**
- * Lietotājs no tokena
- */
+// ----------------------------------------------------
+// User no tokena
+// ----------------------------------------------------
+
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-/**
- * Maršrutu saraksts (debug)
- */
+// ----------------------------------------------------
+// Routes list (debug)
+// ----------------------------------------------------
+
 Route::get('/_routes', function () {
     $routes = collect(Route::getRoutes())->map(function ($r) {
         return [
@@ -199,8 +216,6 @@ Route::get('/_routes', function () {
     return response()->json([
         'count' => $routes->count(),
         'auth'  => $routes->filter(fn ($x) => str_contains($x['uri'], 'api/auth'))->values(),
-        'api'   => $routes->filter(fn ($x) => str_starts_with($x['uri'], 'api/'))->take(80)->values(),
+        'api'   => $routes->filter(fn ($x) => str_starts_with($x['uri'], 'api/'))->take(120)->values(),
     ]);
 });
-
-Route::post('/auth/login3', [AuthenticatedSessionController::class, 'store']);
