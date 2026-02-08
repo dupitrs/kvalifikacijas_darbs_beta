@@ -35,6 +35,10 @@ Route::get('/finger', fn() => response()->json([
     'time' => now()->toDateTimeString(),
 ]));
 
+Route::post('/x1', fn() => response()->json(['hit' => 'x1']));
+Route::post('/login', fn() => response()->json(['hit' => 'login']));
+Route::post('/token', fn() => response()->json(['hit' => 'token']));
+
 
 Route::get('/rf', function () {
     return response()->json([
