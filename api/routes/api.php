@@ -30,6 +30,12 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 Route::get('/ping', fn () => response()->json(['ok' => true]));
 
+Route::get('/finger', fn() => response()->json([
+    'finger' => 'FINGER-2026-02-08-AAA',
+    'time' => now()->toDateTimeString(),
+]));
+
+
 Route::get('/rf', function () {
     return response()->json([
         'rf' => 'RF-2026-02-08-01',
