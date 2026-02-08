@@ -16,6 +16,16 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 | Šeit ir tikai API maršruti. Viss atgriež JSON.
 */
 
+Route::post('/session-login', [AuthenticatedSessionController::class, 'store']);
+
+Route::get('/rf', function () {
+    return response()->json([
+        'rf' => 'RF-2026-02-08-01',
+        'time' => now()->toDateTimeString(),
+    ]);
+});
+
+
 Route::get('/version', function () {
     return response()->json([
         'version' => '2026-02-08-01',
