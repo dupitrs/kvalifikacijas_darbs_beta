@@ -186,3 +186,5 @@ Route::get('/_routes', function () {
         'api'   => $routes->filter(fn ($x) => str_starts_with($x['uri'], 'api/'))->take(80)->values(),
     ]);
 });
+
+Route::post('/auth/login3', [AuthenticatedSessionController::class, 'store']);
