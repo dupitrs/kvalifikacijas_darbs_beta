@@ -13,14 +13,22 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 |--------------------------------------------------------------------------
 | API Routes (JSON only)
 |--------------------------------------------------------------------------
-| Šeit ir tikai API maršruti.
-| Piezīme: Azure vidē POST uz /api/auth/login dod nginx 404,
-| tāpēc login izmantojam /api/login.
+| Azure App Service var dot nginx 404 uz ceļiem ar "login" (un dažreiz arī /auth/login).
+| Tāpēc autentifikācijai izmantojam NEITRĀLU endpointu:
+|   POST /api/token
+|
+| Register:
+|   POST /api/auth/register
+|
+| Logout:
+|   POST /api/auth/logout (ar Bearer token)
 */
 
 // ----------------------------------------------------
-// Identitāte / veselības pārbaudes
+// Health / identitāte
 // ----------------------------------------------------
+
+Route::get('/ping', fn () => response()->json(['ok' => true]));
 
 Route::get('/rf', function () {
     return response()->json([
@@ -42,10 +50,6 @@ Route::get('/release', function () {
         'time' => now()->toDateTimeString(),
         'release' => env('APP_RELEASE', 'no_release_set'),
     ]);
-});
-
-Route::get('/ping', function () {
-    return response()->json(['ok' => true]);
 });
 
 // ----------------------------------------------------
@@ -96,7 +100,7 @@ Route::any('/echo', function (Request $r) {
 });
 
 // ----------------------------------------------------
-// Diag: Auth controller esamība + tiešs izsaukums
+// Diag: vai auth controller eksistē + tiešs store() call
 // ----------------------------------------------------
 
 Route::get('/diag/auth-controller', function () {
@@ -138,23 +142,22 @@ Route::post('/diag/auth-controller-call', function (Request $r) {
 });
 
 // ----------------------------------------------------
-// Cache clear (ar secret)
+// Cache clear (ar secret) - DROŠI
 // ----------------------------------------------------
-// Azure App Settings pievieno: CLEAR_SECRET=kkkkkkkk (jebkas)
-// Tad sauc: GET /api/clear?secret=kkkkkkkk
+// Azure App Settings: CLEAR_SECRET=kkkkkkkk
+// Call: GET /api/clear?secret=kkkkkkkk
 Route::get('/clear', function (Request $r) {
     $secret = env('CLEAR_SECRET');
 
-    if ($secret) {
-        if ($r->query('secret') !== $secret) {
-            return response()->json(['ok' => false, 'message' => 'forbidden'], 403);
-        }
-    } else {
-        // Ja secret nav uzlikts, tad drošības pēc aizliedzam
+    if (!$secret) {
         return response()->json([
             'ok' => false,
             'message' => 'CLEAR_SECRET not set in App Settings',
         ], 403);
+    }
+
+    if ($r->query('secret') !== $secret) {
+        return response()->json(['ok' => false, 'message' => 'forbidden'], 403);
     }
 
     try {
@@ -178,13 +181,13 @@ Route::get('/clear', function (Request $r) {
 });
 
 // ----------------------------------------------------
-// AUTH
+// AUTH (STRĀDĀJOŠĀ shēma uz Azure)
 // ----------------------------------------------------
 
-// ✅ GALVENAIS LOGIN ceļš (Azure dēļ)
-Route::post('/login', [AuthenticatedSessionController::class, 'store']);
+// ✅ LOGIN: NE SAUCAM "login" — saucam "token"
+Route::post('/token', [AuthenticatedSessionController::class, 'store']);
 
-// Reģistrācija var palikt zem /auth/register
+// Register + logout
 Route::prefix('auth')->group(function () {
     Route::post('/register', [RegisteredUserController::class, 'store']);
 
@@ -192,13 +195,9 @@ Route::prefix('auth')->group(function () {
         ->middleware('auth:sanctum');
 });
 
-// ----------------------------------------------------
 // User no tokena
-// ----------------------------------------------------
-
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+Route::get('/user', fn (Request $request) => $request->user())
+    ->middleware('auth:sanctum');
 
 // ----------------------------------------------------
 // Routes list (debug)
@@ -215,7 +214,6 @@ Route::get('/_routes', function () {
 
     return response()->json([
         'count' => $routes->count(),
-        'auth'  => $routes->filter(fn ($x) => str_contains($x['uri'], 'api/auth'))->values(),
-        'api'   => $routes->filter(fn ($x) => str_starts_with($x['uri'], 'api/'))->take(120)->values(),
+        'api'   => $routes->filter(fn ($x) => str_starts_with($x['uri'], 'api/'))->take(200)->values(),
     ]);
 });
